@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NodeJS Starter Application</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="stylesheets/style.css">
+  </head>
+
+  <body>
+    <table>
+      <tr>
+        <td style= "width:30%;">
+          <img id="preview" class = "newappIcon" src="images/newapp-icon.png">
+        <td>
+        <h1>Unggah gambar dan dapatkan jawaban dari Watson!</h1>
+        <form id='file-form'>
+          <input type="file" id="file-select" name="photo"></input>
+          <button type="submit" id="file-submit" disabled>Unggah</button>
+        </form>
+        <pre id="result"></pre>
+    </table>
+    <script>
+      var form = document.getElementById('file-form');
+      var fileSelect = document.getElementById('file-select');
+      var formSubmit = document.getElementById('file-submit');
+      var result = document.getElementById('result');
+      var preview = document.getElementById('preview');
+
+      function previewImage(file) {
+        if (!file) {
+          preview.src = 'images/newapp-icon.png';
+          return;
+        }
+        var reader = new FileReader();
+        reader.onloadend = function(event) {
+          preview.src = event.target.result;   
+        }
+        reader.readAsDataURL(file);
+      }
+
+      fileSelect.onchange = function(event) {
+        formSubmit.setAttribute('disabled', 'disabled');
+        if (fileSelect.files.length > 0)
+          formSubmit.removeAttribute('disabled');
+        result.innerHTML = '';
+        previewImage(fileSelect.files[0]);
+      }
+
+      form.onsubmit = function(event) {
+        event.preventDefault();
+        formSubmit.innerHTML = 'Menggunggah...';
+        formSubmit.setAttribute('disabled', 'disabled');
+        result.innerHTML = '';
+
+        var files = fileSelect.files;
+        var file = files[0];
+        var formData = new FormData();
+        formData.append('photo', file, file.name);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/upload', true);
+        xhr.onload = function() {
+          result.innerHTML = JSON.stringify(JSON.parse(this.responseText), null, 2);
+          formSubmit.innerHTML = 'Unggah';
+          formSubmit.removeAttribute('disabled');
+        }
+        xhr.send(formData); 
+      }
+    </script>
+  </body>
+</html>
